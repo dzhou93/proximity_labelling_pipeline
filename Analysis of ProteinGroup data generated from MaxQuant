@@ -1,0 +1,780 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.impute import SimpleImputer
+import seaborn as sns
+
+
+# In[2]:
+
+
+#show all the columns of the dataframe
+pd.set_option('display.max_columns', 500)
+
+
+# In[3]:
+
+
+#import the original data, when the file is too large, set engine to 'Python'
+ori_table = pd.read_csv("file_name", sep='\t', engine='python') #file_name = directory + file name
+
+
+# In[ ]:
+
+
+
+
+
+# In[4]:
+
+
+#show the dimension of the original matrix
+print(f'The shape of the original matrix is\t\t {ori_table.shape}\n')
+
+
+# In[5]:
+
+
+#first round of cleaning
+ori_table = ori_table[ori_table['Only identified by site'] != '+']
+ori_table = ori_table[ori_table['Reverse'] != '+']
+ori_table = ori_table[ori_table['Potential contaminant'] != '+']
+
+
+# In[6]:
+
+
+#show the dimension of the cleaned matrix
+print(f'The shape of the matrix after data cleasing is\t {ori_table.shape}\n')
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[7]:
+
+
+print(ori_table.head)
+
+
+# In[8]:
+
+
+ori_table.rename(columns={'Peptides Ctrl_1':'Peptides ctrl_1',                          'Razor + unique peptides Ctrl_1':'Razor + unique peptides ctrl_1',                          'Unique peptides Ctrl_1':'Unique peptides ctrl_1',                          'Identification type Ctrl_1':'Identification type ctrl_1',                          'Sequence coverage Ctrl_1 [%]':'Sequence coverage ctrl_1 [%]',                          'Intensity Ctrl_1':'Intensity ctrl_1',                          'LFQ intensity Ctrl_1':'LFQ intensity ctrl_1',                          'MS/MS count Ctrl_1':'MS/MS count ctrl_1',                           },inplace=True)
+
+
+# In[9]:
+
+
+ori_table.iloc[1:ori_table.size, 12:50]
+
+
+# In[10]:
+
+
+def iterate_histogram(matrix):
+    plt.figure(figsize=(10, 6))
+    plt.title("LFQ distribution")
+    for i in range(1,5):
+        int_col = 'LFQ intensity Baf_' + str(i)
+        sns.distplot(a=matrix[int_col], kde=False)
+        int_col = 'LFQ intensity ctrl_' + str(i)
+        sns.distplot(a=matrix[int_col], kde=False)
+    for i in range(1,4):
+        int_col = 'LFQ intensity RAPI_' + str(i)
+        sns.distplot(a=matrix[int_col], kde=False)
+    return
+
+def iterate_density_plot(matrix):
+    plt.figure(figsize=(10, 6))
+    plt.title("LFQ distribution")
+    for i in range(1,5):
+        int_col = 'LFQ intensity Baf_' + str(i)
+        sns.distplot(a=matrix[int_col], kde=False)
+        int_col = 'LFQ intensity ctrl_' + str(i)
+        sns.distplot(a=matrix[int_col], kde=False)
+    for i in range(1,4):
+        int_col = 'LFQ intensity RAPI_' + str(i)
+        sns.distplot(a=matrix[int_col], kde=False)
+    return
+
+
+# In[11]:
+
+
+iterate_histogram(ori_table)
+
+
+# In[12]:
+
+
+iterate_density_plot(ori_table)
+
+
+# In[13]:
+
+
+def data_transform_log2(row):
+    for i in range(1,5):
+        int_col = 'LFQ intensity Baf_' + str(i)
+        if row[int_col] == 0:
+            row[int_col] = np.nan
+        else:
+            row[int_col] = np.log2(row[int_col])
+        
+        int_col = 'LFQ intensity ctrl_' + str(i)
+        if row[int_col] == 0:
+            row[int_col] = np.nan
+        else:
+            row[int_col] = np.log2(row[int_col])
+
+    return row
+
+
+# In[14]:
+
+
+transformed_matrix = ori_table.apply(data_transform_log2, axis=1)
+
+
+# In[15]:
+
+
+transformed_matrix.head()
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[16]:
+
+
+plt.figure(figsize=(10, 6))
+plt.title("LFQ distribution_transformed_BAF")
+#sns.distplot(a=transformed_matrix['LFQ intensity C1'], label='LFQ intensity C1', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C2'], label='LFQ intensity C2', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C3'], label='LFQ intensity C3', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C4'], label='LFQ intensity C4', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C5'], label='LFQ intensity C5', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C6'], label='LFQ intensity C6', kde=False)
+
+sns.kdeplot(data=transformed_matrix['LFQ intensity Baf_1'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity Baf_2'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity Baf_3'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity Baf_4'], shade=False)
+
+
+# In[17]:
+
+
+plt.figure(figsize=(10, 6))
+plt.title("LFQ distribution_transformed_CTRL")
+#sns.distplot(a=transformed_matrix['LFQ intensity C1'], label='LFQ intensity C1', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C2'], label='LFQ intensity C2', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C3'], label='LFQ intensity C3', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C4'], label='LFQ intensity C4', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C5'], label='LFQ intensity C5', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C6'], label='LFQ intensity C6', kde=False)
+
+sns.kdeplot(data=transformed_matrix['LFQ intensity ctrl_1'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity ctrl_2'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity ctrl_3'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity ctrl_4'], shade=False)
+
+
+# In[18]:
+
+
+plt.figure(figsize=(10, 6))
+plt.title("LFQ distribution_transformed_RAPI")
+#sns.distplot(a=transformed_matrix['LFQ intensity C1'], label='LFQ intensity C1', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C2'], label='LFQ intensity C2', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C3'], label='LFQ intensity C3', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C4'], label='LFQ intensity C4', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C5'], label='LFQ intensity C5', kde=False)
+#sns.distplot(a=transformed_matrix['LFQ intensity C6'], label='LFQ intensity C6', kde=False)
+
+sns.kdeplot(data=transformed_matrix['LFQ intensity RAPI_1'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity RAPI_2'], shade=False)
+sns.kdeplot(data=transformed_matrix['LFQ intensity RAPI_3'], shade=False)
+
+
+# In[19]:
+
+
+iterate_histogram(transformed_matrix)
+
+
+# In[20]:
+
+
+iterate_density_plot(transformed_matrix)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[21]:
+
+
+def plot_single_scatter_plot(series_A, series_B):
+    plt.figure(figsize=(6,6))
+    plt.title(f'{series_A.name} vs {series_B.name}')
+    r_value = series_A.corr(series_B)
+    g=sns.scatterplot(x=series_A, y=series_B)
+    g.text(0, 0, r_value)
+    return
+
+def plot_all_members(matrix):
+    lst = []
+    for i in ['Baf_','ctrl_']:
+        for j in range(1,5):
+            lst.append(i + str(j))
+    for i in range(1,4):
+        lst.append('RAPI_' + str(i))
+    for i in lst:
+        for j in lst:
+            int_col_A='LFQ intensity '+ str(i)
+            int_col_B='LFQ intensity '+ str(j)
+            plot_single_scatter_plot(matrix[int_col_A], matrix[int_col_B])
+    return
+
+#add the output module
+
+def plot_all_in_one(matrix):
+    g = sns.PairGrid(matrix.loc[:,"LFQ intensity Baf_1":"LFQ intensity RAPI_3"])
+    g.map_diag(plt.hist, edgecolor="w", bins=15)
+    g.map_offdiag(plt.scatter, edgecolor="w")
+    return
+
+def r_paired(series_A, series_B):
+    r_value = series_A.corr(series_B)
+    return r_value
+
+def r_integrated(matrix):
+    r_matrix = np.ndarray((12,12), np.float32)
+    lst = []
+    for i in ['Baf_','ctrl_']:
+        for j in range(1,5):
+            lst.append(i + str(j))
+    for i in range(1,4):
+        lst.append('RAPI_' + str(i))
+    a = 0
+    for i in lst:
+        b = 0
+        for j in lst:
+            int_col_A='LFQ intensity '+ str(i)
+            int_col_B='LFQ intensity '+ str(j)
+            r_matrix[a,b] = r_paired(matrix[int_col_A], matrix[int_col_B])
+            b = b + 1
+        a = a + 1
+    print(r_matrix)
+    return r_matrix
+
+
+# In[22]:
+
+
+r_integrated(transformed_matrix)
+
+
+# In[23]:
+
+
+#plot_all_members(transformed_matrix)
+plot_all_in_one(transformed_matrix)
+
+
+# In[24]:
+
+
+transformed_matrix_zero=transformed_matrix.fillna(0)
+
+
+# In[25]:
+
+
+plot_all_in_one(transformed_matrix_zero)
+
+
+# In[26]:
+
+
+r_integrated(transformed_matrix_zero)
+
+
+# In[27]:
+
+
+def appear_in_RAPI(row):
+    num = 0
+    for i in range(1,4):
+        col_str = "LFQ intensity RAPI_" + str(i)
+        if row[col_str] != 0:
+            num +=1
+    return num
+
+
+# In[28]:
+
+
+print(transformed_matrix["LFQ intensity RAPI_1"].dtypes)
+
+
+# In[29]:
+
+
+print(transformed_matrix.shape)
+transformed_matrix["# appear in RAPI"] = transformed_matrix.apply(appear_in_RAPI, axis=1)
+new_transformed_matrix = transformed_matrix[transformed_matrix["# appear in RAPI"]<=0]
+#transformed_matrix = transformed_matrix[transformed_matrix["# appear in RAPI"]==0]
+print(new_transformed_matrix.shape)
+
+
+# In[30]:
+
+
+print(new_transformed_matrix["Gene names"])
+
+
+# In[31]:
+
+
+def valid_LFQ_filter(row):
+    num = row["LFQ intensity Baf_1":"LFQ intensity ctrl_4"].isnull().sum()
+    return num
+
+
+# In[32]:
+
+
+transformed_matrix = transformed_matrix[transformed_matrix["# appear in RAPI"]<=1]
+
+
+# In[33]:
+
+
+import matplotlib
+matplotlib.use('Agg')
+
+from pyvenn import venn
+
+
+# In[34]:
+
+
+lst_baf1 = transformed_matrix[transformed_matrix["LFQ intensity Baf_1"].notna()].loc[:,'Gene names'].tolist()
+lst_baf2 = transformed_matrix[transformed_matrix["LFQ intensity Baf_2"].notna()].loc[:,'Gene names'].tolist()
+lst_baf3 = transformed_matrix[transformed_matrix["LFQ intensity Baf_3"].notna()].loc[:,'Gene names'].tolist()
+lst_baf4 = transformed_matrix[transformed_matrix["LFQ intensity Baf_4"].notna()].loc[:,'Gene names'].tolist()
+
+
+# In[35]:
+
+
+lst_ctrl1 = transformed_matrix[transformed_matrix["LFQ intensity ctrl_1"].notna()].loc[:,'Gene names'].tolist()
+lst_ctrl2 = transformed_matrix[transformed_matrix["LFQ intensity ctrl_2"].notna()].loc[:,'Gene names'].tolist()
+lst_ctrl3 = transformed_matrix[transformed_matrix["LFQ intensity ctrl_3"].notna()].loc[:,'Gene names'].tolist()
+lst_ctrl4 = transformed_matrix[transformed_matrix["LFQ intensity ctrl_4"].notna()].loc[:,'Gene names'].tolist()
+
+
+# In[36]:
+
+
+labels = venn.get_labels([lst_baf1, lst_baf2, lst_baf3, lst_baf4], fill=['number', 'logic'])
+fig, ax = venn.venn4(labels, names=['exp. 1', 'exp. 2', 'exp. 3', 'exp. 4'])
+fig.show()
+
+
+# In[37]:
+
+
+labels = venn.get_labels([lst_ctrl1, lst_ctrl2, lst_ctrl3, lst_ctrl4], fill=['number', 'logic'])
+fig, ax = venn.venn4(labels, names=['exp. 1', 'exp. 2', 'exp. 3', 'exp. 4'])
+fig.show()
+
+
+# In[38]:
+
+
+r_integrated(transformed_matrix)
+
+
+# In[39]:
+
+
+transformed_matrix["# of missing value"] = transformed_matrix.apply(valid_LFQ_filter, axis=1)
+
+
+# In[40]:
+
+
+print(transformed_matrix["# of missing value"])
+
+
+# In[41]:
+
+
+ax = transformed_matrix["# of missing value"].plot.hist(bins=8, alpha = 0.5)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[42]:
+
+
+def max_unique_filter(row):
+    return row["Razor + unique peptides Baf_1":"Razor + unique peptides ctrl_4"].max()
+
+
+# In[43]:
+
+
+transformed_matrix["max # unique peptides"] = transformed_matrix.apply(max_unique_filter, axis=1)
+
+
+# In[44]:
+
+
+print(transformed_matrix.shape)
+two_filter_transformed_matrix = transformed_matrix[transformed_matrix["# of missing value"]<=7]
+print(two_filter_transformed_matrix.shape)                                                              
+
+
+# In[45]:
+
+
+#print(transformed_matrix.shape)
+#two_filter_transformed_matrix = transformed_matrix[(transformed_matrix["max # unique peptides"] > 1) & (transformed_matrix["# of missing value"]<=7)]
+#print(two_filter_transformed_matrix.shape)
+
+
+# In[46]:
+
+
+print(two_filter_transformed_matrix)
+
+
+# In[47]:
+
+
+r_integrated(two_filter_transformed_matrix)
+
+
+# In[48]:
+
+
+np.mean(two_filter_transformed_matrix["LFQ intensity Baf_1"])
+
+
+# In[49]:
+
+
+np.mean(two_filter_transformed_matrix[two_filter_transformed_matrix["LFQ intensity Baf_1"].notnull()]["LFQ intensity Baf_1"])
+
+
+# In[50]:
+
+
+np.var(two_filter_transformed_matrix["LFQ intensity Baf_1"])**0.5
+
+
+# In[51]:
+
+
+lst = []
+for i in range(1,9):
+    lst.append(str(i))
+print(lst)
+
+
+# In[ ]:
+
+
+
+
+
+# In[52]:
+
+
+narray_r = r_integrated(two_filter_transformed_matrix)
+
+
+# In[53]:
+
+
+trunc_narray_r = np.ndarray(shape=(8,8), dtype = float, order = 'F')
+
+for i in range(0,8):
+    for j in range(0,8):
+        trunc_narray_r[i,j] = narray_r[i,j]
+        
+print(trunc_narray_r)
+
+
+# In[ ]:
+
+
+
+
+
+# In[54]:
+
+
+r_table_two_filter_transformed_matrix = pd.DataFrame(data=trunc_narray_r,index=lst, columns=lst)
+
+
+# In[55]:
+
+
+print(r_table_two_filter_transformed_matrix)
+
+
+# In[56]:
+
+
+def get_norm_parameters(matrix):
+    lst = []
+    for i in ['Baf_','ctrl_']:
+        for j in range(1,5):
+            lst.append("LFQ intensity " + i + str(j))
+    para_matrix = pd.DataFrame(index=lst,columns=['mean','std','# of valid','# of missing'])
+    for i in lst:
+        para_matrix.loc[i,'mean'] = np.mean(matrix[i])
+        para_matrix.loc[i,'std'] = np.var(matrix[i])**0.5
+        para_matrix.loc[i,'# of valid'] = matrix[i].notnull().sum()
+        para_matrix.loc[i,'# of missing']=matrix[i].isnull().sum()
+    return para_matrix
+
+
+# In[57]:
+
+
+para_matrix = get_norm_parameters(two_filter_transformed_matrix)
+print(para_matrix)
+
+
+# In[58]:
+
+
+imputate_matrix = pd.DataFrame(index=para_matrix.index, columns=['mean','std','# of valid','# of missing'])
+imputate_matrix['mean'] = para_matrix["mean"] - 1.8 * para_matrix["std"]
+imputate_matrix["std"] = 0.25 * para_matrix["std"]
+imputate_matrix[['# of valid','# of missing']] = para_matrix[['# of valid','# of missing']]
+print(imputate_matrix)
+
+
+# In[59]:
+
+
+def generate_random_list(matrix,data_matrix):
+    random_list = []
+    lst = []
+    for i in ['Baf_','ctrl_']:
+        for j in range(1,5):
+            lst.append("LFQ intensity " + i + str(j))
+    for i in lst:
+        col_name = str(i)
+        lst = np.random.normal(loc=matrix.loc[col_name,'mean'],scale=matrix.loc[col_name,'std'],size=matrix.loc[col_name,'# of missing'])
+        random_list.append(lst)
+        plt.figure(figsize=(10, 6))
+        plt.title(f"{col_name} distribution")
+        sns.distplot(a=data_matrix["LFQ intensity Baf_1"], kde=False)
+        sns.distplot(a=lst, kde=False)
+    print(random_list)
+    return random_list
+
+
+# In[60]:
+
+
+all_random_list = generate_random_list(imputate_matrix, two_filter_transformed_matrix)
+
+
+# In[61]:
+
+
+def imputation(matrix,random_list):
+    lst = []
+    for i in ['Baf_','ctrl_']:
+        for j in range(1,5):
+            lst.append("LFQ intensity " + i + str(j))
+    i = 0
+    for a in lst:
+        col_name = str(a)
+        new_col_name = 'imputated ' + str(a)
+        matrix[new_col_name] = matrix[col_name]
+        j=0
+        for k in matrix.index:
+            if np.isnan(matrix.loc[k,new_col_name]):
+                matrix.loc[k,new_col_name] = random_list[i][j]
+                j += 1
+        print(f'the total count of missing value in {new_col_name} is {matrix[new_col_name].isnull().sum()}')
+        i += 1
+    matrix.head()
+    return matrix
+
+
+# In[62]:
+
+
+imputation(two_filter_transformed_matrix,all_random_list)
+
+
+# In[63]:
+
+
+import scipy.stats as stats
+
+
+# In[64]:
+
+
+def t_test(matrix):
+    for i in matrix.index:
+        a, b = stats.ttest_ind(matrix.loc[i,'imputated LFQ intensity Baf_1':'imputated LFQ intensity Baf_4'], matrix.loc[i,'imputated LFQ intensity ctrl_1':'imputated LFQ intensity ctrl_4'])
+        matrix.loc[i,'t-test t-value'] = a
+        matrix.loc[i,'t-test p-value'] = b
+    return matrix
+
+
+# In[65]:
+
+
+t_test(two_filter_transformed_matrix)
+
+
+# In[66]:
+
+
+import statsmodels.stats.multitest
+pval = two_filter_transformed_matrix['t-test p-value']
+a = statsmodels.stats.multitest.multipletests(pval, alpha=0.05, method='fdr_bh')
+two_filter_transformed_matrix['corrected significance FDR0.05'] = a[0]
+two_filter_transformed_matrix['corrected p-value FDR0.05'] = a[1]
+
+b = statsmodels.stats.multitest.multipletests(pval, alpha=0.10, method='fdr_bh')
+two_filter_transformed_matrix['corrected significance FDR0.10'] = b[0]
+two_filter_transformed_matrix['corrected p-value FDR0.10'] = b[1]
+
+c = statsmodels.stats.multitest.multipletests(pval, alpha=0.01, method='fdr_bh')
+two_filter_transformed_matrix['corrected significance FDR0.01'] = c[0]
+two_filter_transformed_matrix['corrected p-value FDR0.01'] = c[1]
+
+two_filter_transformed_matrix.head()
+
+
+# In[67]:
+
+
+two_filter_transformed_matrix.to_excel("/Users/dzhou/Desktop/T_RAPI_LFQ_intensity.xlsx")
+
+
+# In[ ]:
+
+
+
+
